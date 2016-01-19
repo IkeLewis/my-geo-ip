@@ -1,0 +1,18 @@
+# Copyright (c) 2015 Isaac Lewis all rights reserved. 
+# Use /bin/bash to run commands, instead of the default /bin/sh.
+
+SHELL=/bin/bash
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+# The databases are updated on the first Tuesday of each month.
+
+# |           Legend             |
+# --------------------------------
+# | m      | minute (0-59)       |
+# | h      | hour (0-23)         |
+# | dom    | day of month (1-31) |
+# | m      | month (1-12)        |
+# | dow    | day of week (1-7)   |
+
+# m   h dom  m dow
+  0   0 1-7  *   *  [ $( date +\%-u ) -eq 2 ] && cd ${geo_ip_home} && 1>log.txt 2>&1 ./update.sh

@@ -1,0 +1,78 @@
+-- Copyright (c) 2015 Isaac Lewis all rights reserved.
+
+-- SQL code to create the (empty) geo-ip database and its users
+
+-- First make sure the mysql proc table is OK.
+
+REPAIR TABLES mysql.proc;
+
+-- Setup the database
+
+DROP DATABASE IF EXISTS geo_ip;
+CREATE DATABASE geo_ip CHARACTER SET utf8;
+
+USE geo_ip;
+
+-- Load the required SQL libraries
+
+source $geo_ip_home/lib-admin.sql;
+
+-- Copy shell variables to SQL-user variables
+
+SET @geo_ip_home='$geo_ip_home',
+    @geo_ip_pass='$mysql_geo_ip_pass',	
+    @geo_ip_updater_pass='$mysql_geo_ip_updater_pass';
+
+-- Create the country locations table (a small table optimized for
+-- geoname_id searches)
+
+DROP TABLE IF EXISTS geo_ip.country_locations;
+CREATE TABLE geo_ip.country_locations (date DATE, geoname_id
+VARCHAR(7), locale_code VARCHAR(2), continent_code VARCHAR(2),
+continent_name VARCHAR(13), country_iso_code VARCHAR(2), country_name
+VARCHAR(44), PRIMARY KEY ( geoname_id ));
+
+-- Create the country blocks table (a large table optimized for fast
+-- IP searches)
+
+DROP TABLE IF EXISTS country_blocks_ipv4;
+CREATE TABLE country_blocks_ipv4 (date DATE, min_ip INT UNSIGNED,
+max_ip INT UNSIGNED, geoname_id VARCHAR(7),
+registered_country_geoname_id VARCHAR(7),
+represented_country_geoname_id VARCHAR(7), is_anonymous_proxy
+VARCHAR(1), is_satellite_provider VARCHAR(1), PRIMARY KEY ( min_ip ));
+
+-- PUBLIC API (see the README for examples)
+
+DROP PROCEDURE IF EXISTS geo_ip.info;
+delimiter //
+CREATE PROCEDURE geo_ip.info(ip CHAR(15))
+BEGIN
+SELECT * FROM country_blocks_ipv4 NATURAL JOIN country_locations WHERE
+min_ip<=INET_ATON(ip) AND INET_ATON(ip)<=max_ip ORDER BY date DESC
+LIMIT 1;
+END//
+delimiter ;
+
+-- Setup 2 users (one with read only access and one with update
+-- permissions).
+
+CALL DROP_USER_IF_EXISTS('geo_ip','%'); 
+CALL CREATE_USER('geo_ip','%',@geo_ip_pass);
+REVOKE ALL PRIVILEGES, GRANT OPTION FROM 'geo_ip'@'%';
+GRANT SELECT ON TABLE country_locations TO 'geo_ip'@'%';
+GRANT SELECT ON TABLE country_blocks_ipv4 TO 'geo_ip'@'%';
+GRANT EXECUTE ON PROCEDURE geo_ip.info TO 'geo_ip'@'%';
+FLUSH PRIVILEGES;
+
+CALL DROP_USER_IF_EXISTS('geo_ip_updater','%');
+CALL CREATE_USER('geo_ip_updater','%',@geo_ip_updater_pass);
+REVOKE ALL PRIVILEGES, GRANT OPTION FROM 'geo_ip_updater'@'%';
+GRANT SELECT, INSERT, DELETE, UPDATE ON TABLE country_locations TO
+'geo_ip_updater'@'%';
+GRANT SELECT, INSERT, DELETE, UPDATE ON TABLE country_blocks_ipv4 TO
+'geo_ip_updater'@'%';
+GRANT EXECUTE ON geo_ip.* TO 'geo_ip_updater'@'%';
+GRANT FILE, ALTER ROUTINE, CREATE ROUTINE ON *.* TO
+'geo_ip_updater'@'%';
+FLUSH PRIVILEGES;

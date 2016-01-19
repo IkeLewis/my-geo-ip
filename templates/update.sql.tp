@@ -1,0 +1,39 @@
+-- Copyright (c) 2015 Isaac Lewis all rights reserved. 
+
+-- SQL code to update the geo-ip database (with no downtime)
+
+USE geo_ip;
+
+-- Load the required SQL libraries
+
+source $geo_ip_home/lib-admin.sql;
+
+-- Copy shell variables
+
+SET @archive_date='$geo_ip_archive_date',
+    @geo_ip_cl='$geo_ip_cl_fn',
+    @geo_ip_cb='$geo_ip_cb_fn';
+
+-- Insert the new rows
+
+LOAD DATA INFILE '$geo_ip_cl_fn' REPLACE INTO TABLE country_locations
+CHARACTER SET utf8 FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY
+'\"' IGNORE 1 LINES (geoname_id, locale_code, continent_code,
+continent_name, country_iso_code, country_name) SET
+date=@archive_date;
+
+LOAD DATA INFILE '$geo_ip_cb_fn' REPLACE INTO TABLE
+country_blocks_ipv4 CHARACTER SET utf8 FIELDS TERMINATED BY ','
+OPTIONALLY ENCLOSED BY '\"' IGNORE 1 LINES (@network, geoname_id,
+registered_country_geoname_id, represented_country_geoname_id,
+is_anonymous_proxy, is_satellite_provider) SET date=@archive_date,
+min_ip=INET_ATON(SUBSTRING_INDEX(@network,'/',1)),
+max_ip=min_ip+POW(2,32-INET_ATON(SUBSTRING_INDEX(@network,'/',-1)))-1;
+
+-- Remove the outdated rows
+
+DELETE FROM country_locations WHERE date <
+DATE('$geo_ip_archive_date');
+
+DELETE FROM country_blocks_ipv4 WHERE date <
+DATE('$geo_ip_archive_date');
