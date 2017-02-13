@@ -52,6 +52,12 @@ touch "$geo_ip_home/log.txt"
 [ ! "$mysql_geo_ip_pass" ] && read -p "Set the password for the MySQL user 'geo_ip': " mysql_geo_ip_pass
 [ ! "$mysql_geo_ip_updater_pass" ] && read -p "Set the password for the MySQL user 'geo_ip_updater': " mysql_geo_ip_updater_pass
 
+# Update the mysql config
+echo -e "[mysqld]\nsecure_file_priv=\"\"" > /etc/mysql/conf.d/my-geo-ip.cnf
+
+# Restart mysql
+service mysql restart
+
 # Create the empty geo-ip database and two users.*
 eval "envsubst < templates/create.sql.tp | mysql -t -u root --password=\"$mysql_root_pass\""
 
