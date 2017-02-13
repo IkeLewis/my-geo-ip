@@ -55,6 +55,18 @@ chown -R geo-ip:geo-ip $geo_ip_home
 [ ! "$mysql_geo_ip_pass" ] && read -p "Set the password for the MySQL user 'geo_ip': " mysql_geo_ip_pass
 [ ! "$mysql_geo_ip_updater_pass" ] && read -p "Set the password for the MySQL user 'geo_ip_updater': " mysql_geo_ip_updater_pass
 
+## Save the passwords
+
+# Don't substitute for these env vars
+geo_ip_root_env='$geo_ip_root_env'
+geo_ip_geo_ip_env='$geo_ip_geo_ip_env'
+
+# Generate the password files
+envsubst < templates/root-env.sh.tp  > root-env.sh
+envsubst < templates/geo-ip-env.sh.tp > "$geo_ip_home/geo-ip-env.sh"
+
+##
+
 # Update the mysql config
 echo -e "[mysqld]\nsecure_file_priv=\"\"" > /etc/mysql/conf.d/my-geo-ip.cnf
 
