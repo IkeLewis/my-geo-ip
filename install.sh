@@ -47,6 +47,9 @@ cp -r !(makefile||*install.sh||*~) "$geo_ip_home"
 # Create an empty log file
 touch "$geo_ip_home/log.txt"
 
+# Set file ownership
+chown -R geo-ip:geo-ip $geo_ip_home
+
 # Read the MySQL passwords.
 [ ! "$mysql_root_pass" ] && read -p "Enter the (previously set) MySQL root password: " mysql_root_pass
 [ ! "$mysql_geo_ip_pass" ] && read -p "Set the password for the MySQL user 'geo_ip': " mysql_geo_ip_pass
