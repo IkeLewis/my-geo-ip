@@ -93,7 +93,7 @@ do
 
 	# Check that the updated file has been downloaded.
 	if [ "$geo_ip_archive_date" == "$updated_date" ]; then
-	    [ -e "$geo_ip_fn.bak" ] && rm "$geo_ip_fn.bak"
+	    [ -e "$geo_ip_fn.bak" ] && rm -f "$geo_ip_fn.bak"
 	    break 1
 	else
 	    echo "Updated file is not yet available."
