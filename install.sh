@@ -43,7 +43,7 @@ mkdir -p "$geo_ip_home/downloads"
 
 # Copy the required files to the user's home dir.
 cp -R download.sh lib-admin.sql env.sh update.sh global-env.sh trap.sh \
-geo-ip-env.sh templates $geo_ip_home
+templates $geo_ip_home
 
 # Create an empty log file
 touch "$geo_ip_home/log.txt"
