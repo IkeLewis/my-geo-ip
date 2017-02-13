@@ -36,7 +36,7 @@ geo_ip_act="Install"
 quiet id "geo-ip" && echo "Removing any previous installations" && ./uninstall.sh
 
 # Create the geo-ip user.
-adduser --system "geo-ip" --shell /bin/bash
+adduser --system --group --shell /bin/bash --home $geo_ip_home "geo-ip"
 
 # Create the downloads directory.
 mkdir -p "$geo_ip_home/downloads"
