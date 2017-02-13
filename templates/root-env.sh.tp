@@ -29,6 +29,6 @@ if [ ! "$geo_ip_root_env" ]; then
     mysql_geo_ip_pass=$mysql_geo_ip_pass
     mysql_geo_ip_updater_pass=$mysql_geo_ip_updater_pass
 
-    export ${!geo_ip_* !mysql_*}
+    export ${!geo_ip_*} ${!mysql_*}
 
 fi
