@@ -1,4 +1,4 @@
--- my-geio-ip -- The my-geo-ip package provides geo-ip services to
+-- my-geo-ip -- The my-geo-ip package provides geo-ip services to
 --               applications via a MySQL database.
 -- Copyright (C) 2016 Isaac Lewis
 
