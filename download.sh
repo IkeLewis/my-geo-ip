@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -x
 
 # my-geo-ip -- The my-geo-ip package provides geo-ip services to
 #               applications via a MySQL database.
