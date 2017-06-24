@@ -21,7 +21,7 @@
 
 ## Setup environment variables and error handling.
 
-# Exit immediately if a pipeline exits with a non-zero status. 
+# Exit immediately if a pipeline exits with a non-zero status.
 set -e
 
 # Load all required environment variables.
@@ -72,6 +72,9 @@ fi
 # Remove any temporary files created by previous updates.
 rm -rf $geo_ip_tmp
 
+# Make sure the necessary directories exist
+mkdir -p $geo_ip_tmp
+
 # Extract the database to a temporary (world readable) location.
 unzip -d $geo_ip_tmp $geo_ip_fn
 
@@ -84,8 +87,3 @@ geo_ip_cb_fn="$( realpath $geo_ip_cb_fn )"
 
 # Load the temporary CSV database into the MySQL database.
 eval "envsubst < templates/update.sql.tp | mysql -t -u geo_ip_updater --password=\"$mysql_geo_ip_updater_pass\""
-
-
-
-
-
