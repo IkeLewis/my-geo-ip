@@ -1,7 +1,7 @@
 #!/bin/bash -x
 
 # my-geo-ip -- The my-geo-ip package provides geo-ip services to
-#               applications via a MySQL database.
+#              applications via a MySQL database.
 # Copyright (C) 2016 Isaac Lewis
 
 # This program is free software: you can redistribute it and/or modify
@@ -22,7 +22,7 @@
 if [ ! "$geo_ip_env" ]; then
 
     # Include flag (don't edit)
-    geo_ip_env=1    
+    geo_ip_env=1
 
     # Load the user environment variables.
     if [ -e "$(id -un)-env.sh" ]; then

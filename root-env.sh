@@ -25,9 +25,9 @@ if [ ! "$geo_ip_root_env" ]; then
     geo_ip_root_env=1
 
     # 'mysql' variables
-    mysql_root_pass=
-    mysql_geo_ip_pass=
-    mysql_geo_ip_updater_pass=
+    mysql_root_pass=$(pwgen 12 1)
+    mysql_geo_ip_pass=$(pwgen 12 1)
+    mysql_geo_ip_updater_pass=$(pwgen 12 1)
 
     export ${!geo_ip_*} ${!mysql_*}
 
