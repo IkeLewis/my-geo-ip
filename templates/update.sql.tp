@@ -21,7 +21,7 @@ USE geo_ip;
 
 -- Load the required SQL libraries
 
-source $geo_ip_home/lib-admin.sql;
+   source $mysql_geo_ip_load_dir/lib-admin.sql;
 
 -- Copy shell variables
 
