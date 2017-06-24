@@ -29,6 +29,9 @@ if [ ! "$geo_ip_root_env" ]; then
     mysql_geo_ip_pass=$(pwgen 12 1)
     mysql_geo_ip_updater_pass=$(pwgen 12 1)
 
+    # This environment variable is used by the official MySQL docker
+    # image.
+    export MYSQL_ROOT_PASSWORD=${mysql_root_pass}
     export ${!geo_ip_*} ${!mysql_*}
 
 fi
