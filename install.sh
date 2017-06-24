@@ -1,7 +1,7 @@
 #!/bin/bash -x
 
 # my-geo-ip -- The my-geo-ip package provides geo-ip services to
-#               applications via a MySQL database.
+#              applications via a MySQL database.
 # Copyright (C) 2016 Isaac Lewis
 
 # This program is free software: you can redistribute it and/or modify
@@ -36,22 +36,25 @@ geo_ip_act="Install"
 quiet id "geo-ip" && echo "Removing any previous installations" && ./uninstall.sh
 
 # Create the geo-ip user.
-adduser --system --group --shell /bin/bash --home $geo_ip_home "geo-ip"
+adduser --system "geo-ip" --shell /bin/bash
+
+# Add the geo-ip user to the MySQL group (for access to
+# /var/lib/mysql-files).
+usermod -a -G mysql geo-ip
 
 # Create the downloads directory.
 mkdir -p "$geo_ip_home/downloads"
 
 # Copy the required files to the user's home dir.
-cp -R download.sh lib-admin.sql env.sh update.sh global-env.sh trap.sh \
-templates $geo_ip_home
+cp -r !(makefile||*install.sh||root-env.sh||*~) "$geo_ip_home"
 
 # Create an empty log file
 touch "$geo_ip_home/log.txt"
 
-# Set file ownership
-chown -R geo-ip:geo-ip $geo_ip_home
+# Make sure all files in geo-ip's home dir are owned by geo-ip.
+chown -R geo-ip /home/geo-ip
 
-# Read the MySQL passwords.
+# Read the MySQL passwords if they are not already set.
 [ ! "$mysql_root_pass" ] && read -p "Enter the (previously set) MySQL root password: " mysql_root_pass
 [ ! "$mysql_geo_ip_pass" ] && read -p "Set the password for the MySQL user 'geo_ip': " mysql_geo_ip_pass
 [ ! "$mysql_geo_ip_updater_pass" ] && read -p "Set the password for the MySQL user 'geo_ip_updater': " mysql_geo_ip_updater_pass
@@ -68,13 +71,24 @@ envsubst < templates/geo-ip-env.sh.tp > "$geo_ip_home/geo-ip-env.sh"
 
 ##
 
-# Update the mysql config
-echo -e "[mysqld]\nsecure_file_priv=\"\"" > /etc/mysql/conf.d/my-geo-ip.cnf
+# Create the directory that my-geo-ip will use to load SQL files.  The
+# directory must be listed in the value of the MySQL variable
+# 'secure_file_priv' (see 'global-env.h' for more details).
+mkdir -p $mysql_geo_ip_load_dir
 
-# Restart mysql
-service mysql restart
+cp "lib-admin.sql" $mysql_geo_ip_load_dir
 
-# Create the empty geo-ip database and two users.*
+# Make sure mysql owns all files in the load dir.
+chown -R mysql:mysql $mysql_load_dir
+
+# Allow users in the mysql group to write to the load dir and deny all
+# other users access.
+chmod -R u=+rwx,g=+rwx,o=-rwx $mysql_load_dir
+
+# Start MySQL if it's not already running.
+service mysql start
+
+# Create the empty geo-ip database and two users.
 eval "envsubst < templates/create.sql.tp | mysql -t -u root --password=\"$mysql_root_pass\""
 
 # Update the geo-ip database.
@@ -82,3 +96,6 @@ source update.sh
 
 # Create a crontab to keep the database current.
 envsubst < templates/crontab.tp | crontab -u "geo-ip" '-'
+
+# Print the passwords
+source print-passwords.sh
