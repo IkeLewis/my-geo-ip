@@ -4,7 +4,7 @@ services:
   - docker
 
 before_install:
-- docker build --tag=my-geo-ip:latest .
+- docker build --tag=ikelewis/my-geo-ip .
 
 script:
 - echo "Build Passing"
