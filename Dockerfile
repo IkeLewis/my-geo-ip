@@ -6,7 +6,7 @@
 #
 # to build the my-geo-ip image.
 #
-# 2) Run the image (using the default data directory):
+# 2) Run the container (using the default data directory):
 #
 # $ docker run --name my-geo-ip -e MYSQL_ROOT_PASSWORD=my-secret-pw -d
 # my-geo-ip:latest
