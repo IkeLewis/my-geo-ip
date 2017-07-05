@@ -62,9 +62,8 @@ At a terminal type
 ```
 $ docker pull ikelewis/my-geo-ip
 
-$ docker run --rm --name my-geo-ip -emysql_geo_ip_pass="test" -d
-my-geo-ip
-
+$ docker run --rm --name my-geo-ip -emysql_geo_ip_pass="test" -d \
+ikelewis/my-geo-ip
 ```
 
 The basic installation is intended for small organizations and for
@@ -82,14 +81,12 @@ will need to be selected to suit your organization's needs.)
 ```
 $ docker pull ikelewis/my-geo-ip
 
-$ docker swarm init --advertise-addr "192.168.1.2"
-
-# Optional: Add additional workers.  Then run
+$ docker swarm init --advertise-addr "192.168.0.193"
 
 $ echo "test" | docker secret create mysql_geo_ip_pass -
 
-$ docker service create --replicas 2 --secret="mysql_geo_ip_pass" \
---name="my-geo-ip" ikelewis/my-geo-ip
+$ docker service create --replicas 2 -p3306:3306 \
+--secret="mysql_geo_ip_pass" --name="my-geo-ip" ikelewis/my-geo-ip
 ```
 
 API Usage Examples
@@ -97,12 +94,24 @@ API Usage Examples
 
 ## Example 1 (Terminal):
 
-```
-$ docker run -it --link my-geo-ip:mysql --rm mysql sh -c 'exec mysql
--h"$MYSQL_PORT_3306_TCP_ADDR" -P"3306" -ugeo_ip
--p"test"'
+For the basic installation
 
-$ mysql > CALL geo_ip.info('012.034.056.078')\G
+```
+$ docker run -it --link my-geo-ip:mysql --rm mysql sh -c 'exec mysql \
+-h"$MYSQL_PORT_3306_TCP_ADDR" -P"3306" -ugeo_ip -p"test"'
+```
+
+For the advanced installation
+
+```
+$ docker run -it --rm mysql /bin/bash -c 'exec mysql \
+-h"192.168.0.193" -P"3306" -ugeo_ip -p"test"'
+```
+
+You should now be at a mysql prompt.
+
+```
+mysql > CALL geo_ip.info('012.034.056.078')\G
 ```
 Sample Output
 
