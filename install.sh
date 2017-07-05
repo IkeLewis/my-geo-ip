@@ -17,6 +17,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+### Install my-geo-ip.
+
+## Setup environment variables and error handling.
+
 # Exit immediately if a pipeline exits with a non-zero status.
 set -e
 
@@ -29,14 +33,18 @@ source env.sh
 # Set any traps.
 source trap.sh
 
+##
+
 # Set the type of action being performed.
 geo_ip_act="Install"
 
 # Remove any previous installations.
 quiet id "geo-ip" && echo "Removing any previous installations" && ./uninstall.sh
 
-# Create the geo-ip user.
-adduser --system "geo-ip" --shell /bin/bash
+## Setup the geo-ip system user.
+
+# Create the geo-ip system user.
+useradd --user-group --create-home --shell /bin/bash --system "geo-ip"
 
 # Add the geo-ip user to the MySQL group (for access to
 # /var/lib/mysql-files).
@@ -46,30 +54,20 @@ usermod -a -G mysql geo-ip
 mkdir -p "$geo_ip_home/downloads"
 
 # Copy the required files to the user's home dir.
-cp -r !(makefile||*install.sh||root-env.sh||*~) "$geo_ip_home"
+cp -r !(makefile||*install.sh||*~) "$geo_ip_home"
 
-# Create an empty log file
+# Create an empty log file.
 touch "$geo_ip_home/log.txt"
 
 # Make sure all files in geo-ip's home dir are owned by geo-ip.
-chown -R geo-ip /home/geo-ip
-
-# Read the MySQL passwords if they are not already set.
-[ ! "$mysql_root_pass" ] && read -p "Enter the (previously set) MySQL root password: " mysql_root_pass
-[ ! "$mysql_geo_ip_pass" ] && read -p "Set the password for the MySQL user 'geo_ip': " mysql_geo_ip_pass
-[ ! "$mysql_geo_ip_updater_pass" ] && read -p "Set the password for the MySQL user 'geo_ip_updater': " mysql_geo_ip_updater_pass
-
-## Save the passwords
-
-# Don't substitute for these env vars
-geo_ip_root_env='$geo_ip_root_env'
-geo_ip_geo_ip_env='$geo_ip_geo_ip_env'
-
-# Generate the password files
-envsubst < templates/root-env.sh.tp  > root-env.sh
-envsubst < templates/geo-ip-env.sh.tp > "$geo_ip_home/geo-ip-env.sh"
+chown -R geo-ip:geo-ip /home/geo-ip
 
 ##
+
+## Install the necessary MySQL directories.
+
+mkdir -p $mysql_my_geo_ip_dir
+mkdir -p $mysql_data_dir
 
 # Create the directory that my-geo-ip will use to load SQL files.  The
 # directory must be listed in the value of the MySQL variable
@@ -78,24 +76,56 @@ mkdir -p $mysql_geo_ip_load_dir
 
 cp "lib-admin.sql" $mysql_geo_ip_load_dir
 
-# Make sure mysql owns all files in the load dir.
-chown -R mysql:mysql $mysql_load_dir
-
 # Allow users in the mysql group to write to the load dir and deny all
 # other users access.
 chmod -R u=+rwx,g=+rwx,o=-rwx $mysql_load_dir
 
-# Start MySQL if it's not already running.
-service mysql start
+# Make sure mysql owns all files in the $mysql_my_geo_ip_dir.
+chown -R mysql:mysql $mysql_my_geo_ip_dir
 
-# Create the empty geo-ip database and two users.
-eval "envsubst < templates/create.sql.tp | mysql -t -u root --password=\"$mysql_root_pass\""
+##
+
+## Configure MySQL.
+
+# Generate the MySQL passwords.
+source build-passwords.sh
+
+# Generate the MySQL config for the system user root.
+envsubst < templates/root.my.cnf.tp  > "/root/.my.cnf"
+
+# Generate the MySQL config for the system user geo-ip.
+envsubst < templates/geo-ip.my.cnf.tp > "$geo_ip_home/.my.cnf"
+chown geo-ip /home/geo-ip/.my.cnf
+
+# Include this for 'mysql_start'.
+source lib-mysql-helpers.sh
+
+# Initialize MySQL.
+mysqld --initialize-insecure
+
+##
+
+## Install the geo-ip database.
+
+# Start the MySQL server.
+mysql_start
+
+# Create the empty geo-ip database.
+eval "envsubst < templates/create-database.sql.tp | mysql --table --password=\"\""
+
+# Create users for the geo-ip database.
+eval "envsubst < templates/create-users.sql.tp | mysql --table --password=\"\""
 
 # Update the geo-ip database.
 source update.sh
 
+# Perform a basic test.
+echo "CALL geo_ip.info('012.034.056.078')\G" | mysql --table
+
 # Create a crontab to keep the database current.
 envsubst < templates/crontab.tp | crontab -u "geo-ip" '-'
 
-# Print the passwords
-source print-passwords.sh
+# Shutdown the MySQL server.
+mysql_stop
+
+##

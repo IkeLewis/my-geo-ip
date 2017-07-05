@@ -1,7 +1,7 @@
 #!/bin/bash -x
 
 # my-geo-ip -- The my-geo-ip package provides geo-ip services to
-#               applications via a MySQL database.
+#              applications via a MySQL database.
 # Copyright (C) 2016 Isaac Lewis
 
 # This program is free software: you can redistribute it and/or modify
@@ -17,42 +17,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-## Time/date variables 
+## Perform the download with wget.
 
-# All dates are in 'YYYYMMDD' format. If the date contained in
-# filenames of the the remote database archive is more recent, than
-# the date contained in the filenames of the local database archive,
-# then an attempt is made to update the local database.  To avoid
-# semantic inconsistencies (like the previous month being considered
-# the same as current month) all dates & times are calculated relative
-# to a single fixed date (the date at which this script starts) rather
-# than the current date.
-
-# Date at which this script starts
-start_date=$( date +%Y%m%d )
-# Year of the start date (YYYY)
-y=$( date -d $start_date +%-Y )
-# Month of the start date (1-12)
-m=$( date -d $start_date +%-m )
-# Day of the month of the start date (1-31)
-d=$( date -d $start_date +%-d )
-# Day of the week of the start date (0-6)
-dow=$( date -d $start_date +%-u )
-
-# Checks to determine if the remote database has been updated coincide
-# exactly with Maxmind's release schedule: the first Tuesday of each
-# month.
-
-# Date of the 1st Tues of the start month
-first_tues=$( date --date="$y-$m-$(( 1 + ($d - $dow + 8) % 7 ))" +%Y%m%d )
-# the previous month
-pm=$(( $m - 1 ))
-# Day of the week of the 1st of the previous month
-dow_1st_pm=$( date --date="$y-$pm-1" +%-u )
-# Date of the 1st Tues of the previous month
-first_tues_pm=$( date --date="$y-$pm-$(( 1+(1-$dow_1st_pm+8)%7 ))" +%Y%m%d )
-
-## Perform the download with wget
+# Make sure this script only runs as the geo-ip user.
+if [ "$USER" != "geo-ip" ]; then
+    geo_ip_error "download.sh must be run as the geo-ip user"
+fi
 
 # Try up to 'max_tries' times to download the updated database file
 # waiting approximately 1hr between attempts. The actual wait time is
@@ -70,13 +40,13 @@ do
 
     # Backup the previous archive if any.
     [ -e "$geo_ip_fn" ] && mv $geo_ip_fn "$geo_ip_fn.bak"
-    
+
     # Attempt to download the archive.
     eval $wget_command
-    
+
     wget_st=$?
 
-    if [ $wget_st -eq 0 ]; then	    
+    if [ $wget_st -eq 0 ]; then
 
 	geo_ip_archive_date=$( unzip -l $geo_ip_fn | grep -m 1 -o $geo_ip_date_rx )
 
@@ -103,7 +73,7 @@ do
     if [ $i -eq $max_tries ]; then
 	[ -e "$geo_ip_fn.bak" ] && mv "$geo_ip_fn.bak" "$geo_ip_fn"
 	if [ $wget_st -eq 0 ]; then
- 	    geo_ip_error "Updated file is not available." 
+ 	    geo_ip_error "Updated file is not available."
 	else
 	    geo_ip_error "Download failed."
 	fi
@@ -118,3 +88,4 @@ do
     (( i++ ))
 
 done
+##

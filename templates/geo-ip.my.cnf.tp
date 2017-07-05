@@ -1,5 +1,3 @@
-#!/bin/bash
-
 # my-geo-ip -- The my-geo-ip package provides geo-ip services to
 #              applications via a MySQL database.
 # Copyright (C) 2016 Isaac Lewis
@@ -17,21 +15,25 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-## User Customizable Variables
+# References:
+#
+# [1] https://dev.mysql.com/doc/refman/5.7/en/server-options.html
+# [2] https://dev.mysql.com/doc/refman/5.7/en/option-files.html
 
-if [ ! "$geo_ip_root_env" ]; then
+# MySQL Config for geo_ip_updater
+[mysql]
+user="geo_ip_updater"
+password="$mysql_geo_ip_updater_pass"
+socket="/var/run/mysqld/mysqld.sock"
 
-    # Include flag (don't edit)
-    geo_ip_root_env=1
+[mysqld]
+user=mysql
+datadir="$mysql_data_dir"
+secure_file_priv="$mysql_load_dir"
+socket="/var/run/mysqld/mysqld.sock"
 
-    # 'mysql' variables
-    mysql_root_pass=$(pwgen 12 1)
-    mysql_geo_ip_pass=$(pwgen 12 1)
-    mysql_geo_ip_updater_pass=$(pwgen 12 1)
-
-    # This environment variable is used by the official MySQL docker
-    # image.
-    export MYSQL_ROOT_PASSWORD=${mysql_root_pass}
-    export ${!geo_ip_*} ${!mysql_*}
-
-fi
+# mysqld --initialize-insecure --user=mysql --basedir=/usr
+# --datadir=/var/lib/mysql --plugin-dir=/usr/lib/mysql/plugin
+# --log-error=/var/log/mysql/error.log
+# --pid-file=/var/run/mysqld/mysqld.pid
+# --socket=/var/run/mysqld/mysqld.sock

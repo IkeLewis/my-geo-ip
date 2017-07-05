@@ -1,5 +1,5 @@
 -- my-geo-ip -- The my-geo-ip package provides geo-ip services to
---               applications via a MySQL database.
+--              applications via a MySQL database.
 -- Copyright (C) 2016 Isaac Lewis
 
 -- This program is free software: you can redistribute it and/or modify
@@ -29,6 +29,8 @@ SET @archive_date='$geo_ip_archive_date',
     @geo_ip_cl='$geo_ip_cl_fn',
     @geo_ip_cb='$geo_ip_cb_fn';
 
+START TRANSACTION;
+
 -- Insert the new rows
 
 LOAD DATA INFILE '$geo_ip_cl_fn' REPLACE INTO TABLE country_locations
@@ -52,3 +54,5 @@ DATE('$geo_ip_archive_date');
 
 DELETE FROM country_blocks_ipv4 WHERE date <
 DATE('$geo_ip_archive_date');
+
+COMMIT;

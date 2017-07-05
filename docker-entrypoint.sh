@@ -1,7 +1,7 @@
-#!/bin/bash
+#!/bin/bash -x
 
 # my-geo-ip -- The my-geo-ip package provides geo-ip services to
-#               applications via a MySQL database.
+#              applications via a MySQL database.
 # Copyright (C) 2016 Isaac Lewis
 
 # This program is free software: you can redistribute it and/or modify
@@ -17,16 +17,41 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-## User Customizable Variables
+## Setup environment variables and error handling.
 
-if [ ! "$geo_ip_geo_ip_env" ]; then
+# Exit immediately if a pipeline exits with a non-zero status.
+set -e
 
-    # Include flag (don't edit)
-    geo_ip_geo_ip_env=1    
+cd /my-geo-ip
 
-    # 'mysql' variable(s)
-    mysql_geo_ip_updater_pass=$mysql_geo_ip_updater_pass
+# Load all required environment variables.
+source env.sh
 
-    export ${!mysql_* !geo_ip_*}
+# Set any traps.
+source trap.sh
+
+##
+
+# If no command is specified, then
+if [ -z "$@" ]; then
+
+    # Include this for 'mysql_start'.
+    source lib-mysql-helpers.sh
+
+    mysql_start
+
+    # Set the MySQL passwords.
+    source set-passwords.sh
+
+    # Update the database if necessary.
+    source update.sh
+
+    # Launch cron to keep the database updated.
+    cron
+
+    wait
+else
+    # Execute the given command.
+    exec "$@"
 
 fi

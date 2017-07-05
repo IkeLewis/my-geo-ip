@@ -17,18 +17,20 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-## User Customizable Variables
+# MySQL passwords used when building the my-geo-ip docker image
 
-if [ ! "$geo_ip_root_env" ]; then
+if [ ! "$build_passwords" ]; then
 
     # Include flag (don't edit)
-    geo_ip_root_env=1
+    export build_passwords=1
 
-    # 'mysql' variables
-    mysql_root_pass=$mysql_root_pass
-    mysql_geo_ip_pass=$mysql_geo_ip_pass
-    mysql_geo_ip_updater_pass=$mysql_geo_ip_updater_pass
+    # 'mysql' passwords
+    mysql_root_pass=$(pwgen -n 12 1)
+    mysql_geo_ip_pass=$(pwgen -n 12 1)
+    mysql_geo_ip_updater_pass=$(pwgen -n 12 1)
 
-    export ${!geo_ip_*} ${!mysql_*}
+    # This environment variable is used by the official MySQL docker
+    # image.
+    export ${!mysql_*}
 
 fi

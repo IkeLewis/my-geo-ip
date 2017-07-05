@@ -8,14 +8,14 @@
 #
 # 2) Run the container (using the default data directory):
 #
-# $ docker run --name my-geo-ip -e MYSQL_ROOT_PASSWORD=my-secret-pw -d
+# $ docker run --name my-geo-ip -emysql_geo_ip_pass="test" -d
 # my-geo-ip:latest
 #
 # 3) Connect to MySQL
 #
 # $ docker run -it --link my-geo-ip:mysql --rm mysql sh -c 'exec mysql
-# -h"$MYSQL_PORT_3306_TCP_ADDR" -P"$MYSQL_PORT_3306_TCP_PORT" -uroot
-# -p"$MYSQL_ENV_MYSQL_ROOT_PASSWORD"'
+# -h"$MYSQL_PORT_3306_TCP_ADDR" -P"$MYSQL_PORT_3306_TCP_PORT" -ugeo_ip
+# -p"test"'
 #
 # See https://hub.docker.com/_/mysql/ for more MySQL options.
 
@@ -27,11 +27,17 @@ RUN /bin/bash -x -c '\
                   # end with '&& \'.
 
 		  apt-get update && \
-		  # apt-get upgrade -y && \
+		  apt-get upgrade -y && \
                   apt-get install -y cron git gettext make unzip wget && \
 		  cd / && \
+
+		  # This dummy line is included so that we may simply
+		  # toggle commenting on lines without having to
+		  # remove '&& \' from the last line.
+
 		  test 1 -eq 1\
 		  '
+
 RUN /bin/bash -x -c '\
                   # All lines except for the last one (and comments)
                   # end with '&& \'.
@@ -40,9 +46,12 @@ RUN /bin/bash -x -c '\
 		  cd my-geo-ip && \
 		  make && \
 		  make install && \
-		  
-		  # This dummy line is included so that we may simply
-		  # toggle commenting on lines without having to
-		  # remove '&& \' from the last line.
+
 		  test 1 -eq 1\
 		  '
+
+VOLUME /root
+VOLUME /home/geo-ip
+VOLUME /var/lib/my-geo-ip
+
+ENTRYPOINT ["/my-geo-ip/docker-entrypoint.sh"]

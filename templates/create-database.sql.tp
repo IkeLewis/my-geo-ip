@@ -15,7 +15,7 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
--- SQL code to create the (empty) geo-ip database and its users
+-- SQL code to create the (empty) geo-ip database
 
 -- First make sure the mysql proc table is OK.
 
@@ -68,26 +68,3 @@ min_ip<=INET_ATON(ip) AND INET_ATON(ip)<=max_ip ORDER BY date DESC
 LIMIT 1;
 END//
 delimiter ;
-
--- Setup 2 users (one with read only access and one with update
--- permissions).
-
-CALL DROP_USER_IF_EXISTS('geo_ip','%'); 
-CALL CREATE_USER('geo_ip','%',@geo_ip_pass);
-REVOKE ALL PRIVILEGES, GRANT OPTION FROM 'geo_ip'@'%';
-GRANT SELECT ON TABLE country_locations TO 'geo_ip'@'%';
-GRANT SELECT ON TABLE country_blocks_ipv4 TO 'geo_ip'@'%';
-GRANT EXECUTE ON PROCEDURE geo_ip.info TO 'geo_ip'@'%';
-FLUSH PRIVILEGES;
-
-CALL DROP_USER_IF_EXISTS('geo_ip_updater','%');
-CALL CREATE_USER('geo_ip_updater','%',@geo_ip_updater_pass);
-REVOKE ALL PRIVILEGES, GRANT OPTION FROM 'geo_ip_updater'@'%';
-GRANT SELECT, INSERT, DELETE, UPDATE ON TABLE country_locations TO
-'geo_ip_updater'@'%';
-GRANT SELECT, INSERT, DELETE, UPDATE ON TABLE country_blocks_ipv4 TO
-'geo_ip_updater'@'%';
-GRANT EXECUTE ON geo_ip.* TO 'geo_ip_updater'@'%';
-GRANT FILE, ALTER ROUTINE, CREATE ROUTINE ON *.* TO
-'geo_ip_updater'@'%';
-FLUSH PRIVILEGES;

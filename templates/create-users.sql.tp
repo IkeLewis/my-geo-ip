@@ -1,0 +1,46 @@
+-- SQL code to create the geo-ip database's users
+
+-- This line is required.
+
+USE geo_ip;
+
+-- Load the required SQL libraries
+
+source $mysql_geo_ip_load_dir/lib-admin.sql;
+
+-- Copy shell variables to SQL-user variables
+
+SET @root_pass='$mysql_root_pass',	
+    @geo_ip_pass='$mysql_geo_ip_pass',	
+    @geo_ip_updater_pass='$mysql_geo_ip_updater_pass';
+
+-- Setup the root MySQL user.
+
+DELETE FROM mysql.user WHERE user NOT IN ('mysql.sys', 'mysqlxsys', 'root') OR host NOT IN ('localhost');
+SET PASSWORD FOR 'root'@'localhost'=PASSWORD('$mysql_root_pass') ;
+GRANT ALL ON *.* TO 'root'@'localhost' WITH GRANT OPTION;
+DROP DATABASE IF EXISTS test;
+FLUSH PRIVILEGES;
+
+-- Setup 2 users (one with read only access and one with update
+-- permissions).
+
+CALL DROP_USER_IF_EXISTS('geo_ip','%'); 
+CALL CREATE_USER('geo_ip','%',@geo_ip_pass);
+REVOKE ALL PRIVILEGES, GRANT OPTION FROM 'geo_ip'@'%';
+GRANT SELECT ON TABLE country_locations TO 'geo_ip'@'%';
+GRANT SELECT ON TABLE country_blocks_ipv4 TO 'geo_ip'@'%';
+GRANT EXECUTE ON PROCEDURE geo_ip.info TO 'geo_ip'@'%';
+FLUSH PRIVILEGES;
+
+CALL DROP_USER_IF_EXISTS('geo_ip_updater','localhost');
+CALL CREATE_USER('geo_ip_updater','localhost',@geo_ip_updater_pass);
+REVOKE ALL PRIVILEGES, GRANT OPTION FROM 'geo_ip_updater'@'localhost';
+GRANT SELECT, INSERT, DELETE, UPDATE ON TABLE country_locations TO
+'geo_ip_updater'@'localhost';
+GRANT SELECT, INSERT, DELETE, UPDATE ON TABLE country_blocks_ipv4 TO
+'geo_ip_updater'@'localhost';
+GRANT EXECUTE ON geo_ip.* TO 'geo_ip_updater'@'localhost';
+GRANT FILE, ALTER ROUTINE, CREATE ROUTINE ON *.* TO
+'geo_ip_updater'@'localhost';
+FLUSH PRIVILEGES;

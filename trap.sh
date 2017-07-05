@@ -51,9 +51,9 @@ function quiet () {
 
     # Executes a given command in a subshell where by default all
     # output is discarded.
-    
-    ( 1>/dev/null 2>&1 $@ )    
-    
+
+    ( 1>/dev/null 2>&1 $@ )
+
 }
 
 function exit_status () {
@@ -61,7 +61,7 @@ function exit_status () {
     # Prints the exit status for a given command.  The command is
     # executed in a subshell where by default errors are not trapped
     # and all output is discarded.
-    
+
     ( set +e && quiet $@ )
     es=$?
     echo $es

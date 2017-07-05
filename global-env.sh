@@ -27,15 +27,24 @@ if [ ! "$geo_ip_global_env" ]; then
     # Include flag (don't edit)
     geo_ip_global_env=1
 
+    ## 'mysql_' vars
+
+    mysql_my_geo_ip_dir="/var/lib/my-geo-ip"
+    mysql_data_dir="$mysql_my_geo_ip_dir/data"
+
     # If the mysql server is started with the 'secure_file_priv'
     # option enabled, then mysql can only read from directories listed
     # in the value of the 'secure_file_priv' variable.  The value may
     # be obtained with the following query:
     #
-    # SHOW VARIABLES LIKE "secure_file_priv";
-    mysql_load_dir="/var/lib/mysql-files"
+    # SHOW VARIABLES LIKE "secure_file_priv"
+    mysql_load_dir="$mysql_my_geo_ip_dir/load"
 
     mysql_geo_ip_load_dir="$mysql_load_dir/geo-ip"
+
+    ##
+
+    ## Mostly 'geo_ip_' vars
 
     # Current version
     geo_ip_ver="1.0"
@@ -55,19 +64,20 @@ if [ ! "$geo_ip_global_env" ]; then
     # Date parsed from the archive contents
     geo_ip_archive_date=
 
-    ## Country filenames
-
     # Country locations filename
     geo_ip_cl_fn="$geo_ip_tmp/*Country*/*Country*Locations*en.csv"
 
     # Country blocks filename
     geo_ip_cb_fn="$geo_ip_tmp/*Country*/*Country*Blocks*IPv4.csv"
 
-    ## 'wget' variables
-    # The download URL for the geo-ip database
+    ##
+
+    ## Mostly 'wget_' variables
+
+    # Download URL for the geo-ip database
     wget_url="https://geolite.maxmind.com/download/geoip/database/GeoLite2-Country-CSV.zip"
 
-    # The maximum download size
+    # Maximum download size
     wget_quota="10m"
 
     # Pretend wget is the Iceweasel/Firefox browser
@@ -86,6 +96,8 @@ if [ ! "$geo_ip_global_env" ]; then
     wget_command="wget --inet4-only --server-response \
     --quota=$wget_quota --tries=1 --directory-prefix=\"$wget_dirp\" \
     --user-agent=\"$wget_user_agent\" \"$wget_url\""
+
+    ##
 
     export ${!geo_ip_*} ${!wget_*} ${!mysql_*}
 

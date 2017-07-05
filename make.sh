@@ -17,6 +17,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+## Setup environment variables and error handling.
+
 # Exit immediately if a pipeline exits with a non-zero status.
 set -e
 
@@ -26,6 +28,7 @@ source env.sh
 # Set any traps.
 source trap.sh
 
+##
+
 # Set the type of action being performed.
 geo_ip_act="Build"
-
