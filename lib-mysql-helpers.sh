@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source /usr/share/mysql/mysql-helpers
+#source /usr/share/mysql/mysql-helpers
 
 mysql_start () {
     mysqld &
