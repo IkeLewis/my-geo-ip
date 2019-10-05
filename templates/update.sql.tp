@@ -36,7 +36,7 @@ START TRANSACTION;
 LOAD DATA INFILE '$geo_ip_cl_fn' REPLACE INTO TABLE country_locations
 CHARACTER SET utf8 FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY
 '\"' IGNORE 1 LINES (geoname_id, locale_code, continent_code,
-continent_name, country_iso_code, country_name) SET
+continent_name, country_iso_code, country_name, is_in_european_union) SET
 date=@archive_date;
 
 LOAD DATA INFILE '$geo_ip_cb_fn' REPLACE INTO TABLE
