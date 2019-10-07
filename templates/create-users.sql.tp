@@ -17,7 +17,15 @@ SET @root_pass='$mysql_root_pass',
 -- Setup the root MySQL user.
 
 DELETE FROM mysql.user WHERE user NOT IN ('mysql.sys', 'mysqlxsys', 'root') OR host NOT IN ('localhost');
-SET PASSWORD FOR 'root'@'localhost'=PASSWORD('$mysql_root_pass') ;
+
+-- TODO: finish researching why the statement below no longer works.
+--
+-- SET PASSWORD FOR 'root'@'localhost'=PASSWORD(@root_pass) ;
+--
+-- Hopefully temporary workaround: use 'ALTER USER' instead; this is
+-- not as good (from a security perspective) since the password will
+-- now be stored in clear text rather than as a hash.
+ALTER USER 'root'@'localhost' IDENTIFIED BY @root_pass;
 GRANT ALL ON *.* TO 'root'@'localhost' WITH GRANT OPTION;
 DROP DATABASE IF EXISTS test;
 FLUSH PRIVILEGES;
