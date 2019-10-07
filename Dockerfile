@@ -20,7 +20,7 @@
 # See https://hub.docker.com/_/mysql/ for more MySQL options.
 
 # Extend the official MySQL Base Image
-FROM mysql
+FROM mysql:5.6
 
 RUN /bin/bash -x -c '\
                   # All lines except for the last one (and comments)
