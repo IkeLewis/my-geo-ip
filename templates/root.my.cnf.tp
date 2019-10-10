@@ -11,7 +11,7 @@ socket="/var/run/mysqld/mysqld.sock"
 
 [mysqld]
 user=mysql
-pid-file="$mysql_pid_file"
+pid-file="/var/run/mysqld/mysqld.pid"
 datadir="$mysql_data_dir"
 secure_file_priv="$mysql_geo_ip_load_dir"
 socket="/var/run/mysqld/mysqld.sock"
