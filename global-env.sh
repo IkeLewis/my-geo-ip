@@ -1,24 +1,9 @@
 #!/bin/bash -x
 
 # my-geo-ip -- The my-geo-ip package provides geo-ip services to
-#               applications via a MySQL database.
-# Copyright (C) 2016 Isaac Lewis
-
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-# Exit immediately if a pipeline exits with a non-zero status.
-set -e
+#              applications via a MySQL database.
+#
+# Copyright (C) 2016-2019 Isaac Lewis
 
 #### Set the global environment variables
 
@@ -30,6 +15,7 @@ if [ ! "$geo_ip_global_env" ]; then
     ## 'mysql_' vars
 
     mysql_my_geo_ip_dir="/var/lib/my-geo-ip"
+
     mysql_data_dir="$mysql_my_geo_ip_dir/data"
 
     # If the mysql server is started with the 'secure_file_priv'
@@ -42,9 +28,12 @@ if [ ! "$geo_ip_global_env" ]; then
 
     mysql_geo_ip_load_dir="$mysql_load_dir/geo-ip"
 
-    ##
+    ## 'geo_ip' vars
 
-    ## Mostly 'geo_ip_' vars
+    # Set this to true when debugging
+    geo_ip_debug="true"
+
+    geo_ip_debug_no_sql=""
 
     # Current version
     geo_ip_ver="1.0"
@@ -71,6 +60,11 @@ if [ ! "$geo_ip_global_env" ]; then
     geo_ip_cb_fn="$geo_ip_tmp/*Country*/*Country*Blocks*IPv4.csv"
 
     ##
+
+    ## Bash config vars
+    # 'set -e'/'set +e' -- Exit/Don't exit immediately if a pipeline
+    # exits with a non-zero status.
+    bash_set_cmd="set +e"
 
     ## Mostly 'wget_' variables
 
@@ -99,6 +93,6 @@ if [ ! "$geo_ip_global_env" ]; then
 
     ##
 
-    export ${!geo_ip_*} ${!wget_*} ${!mysql_*}
+    export ${!geo_ip_*} ${!bash_*} ${!wget_*} ${!mysql_*}
 
 fi
