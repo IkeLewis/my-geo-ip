@@ -1,24 +1,7 @@
 # my-geo-ip -- The my-geo-ip package provides geo-ip services to
-#              applications via a MySQL database.
-# Copyright (C) 2016 Isaac Lewis
-
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-# References:
+#               applications via a MySQL database.
 #
-# [1] https://dev.mysql.com/doc/refman/5.7/en/server-options.html
-# [2] https://dev.mysql.com/doc/refman/5.7/en/option-files.html
+# Copyright (C) 2016-2019 Isaac Lewis
 
 # MySQL Config for root
 [mysql]
@@ -28,13 +11,21 @@ socket="/var/run/mysqld/mysqld.sock"
 
 [mysqld]
 user=mysql
-pid-file="/var/run/mysqld/mysqld.pid"
+pid-file="$mysql_pid_file"
 datadir="$mysql_data_dir"
-secure_file_priv="$mysql_load_dir"
+secure_file_priv="$mysql_geo_ip_load_dir"
 socket="/var/run/mysqld/mysqld.sock"
 
+# Helpful command for debugging:
+#
 # mysqld --initialize-insecure --user=mysql --basedir=/usr
 # --datadir=/var/lib/mysql --plugin-dir=/usr/lib/mysql/plugin
 # --log-error=/var/log/mysql/error.log
 # --pid-file=/var/run/mysqld/mysqld.pid
 # --socket=/var/run/mysqld/mysqld.sock
+
+# References:
+#
+# [1] https://dev.mysql.com/doc/refman/8.0/en/server-options.html
+# [2] https://dev.mysql.com/doc/refman/8.0/en/option-files.html
+# [3] https://dev.mysql.com/doc/refman/8.0/en/sha256-pluggable-authentication.html
