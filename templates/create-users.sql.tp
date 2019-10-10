@@ -1,3 +1,8 @@
+-- my-geo-ip -- The my-geo-ip package provides geo-ip services to
+--               applications via a MySQL database.
+--
+-- Copyright (C) 2016-2019 Isaac Lewis
+
 -- SQL code to create the geo-ip database's users
 
 -- This line is required.
@@ -10,22 +15,31 @@ source $mysql_geo_ip_load_dir/lib-admin.sql;
 
 -- Copy shell variables to SQL-user variables
 
-SET @root_pass='$mysql_root_pass',	
-    @geo_ip_pass='$mysql_geo_ip_pass',	
+SET @root_pass='$mysql_root_pass',
+    @geo_ip_pass='$mysql_geo_ip_pass',
     @geo_ip_updater_pass='$mysql_geo_ip_updater_pass';
 
 -- Setup the root MySQL user.
 
 DELETE FROM mysql.user WHERE user NOT IN ('mysql.sys', 'mysqlxsys', 'root') OR host NOT IN ('localhost');
-
--- TODO: finish researching why the statement below no longer works.
 --
--- SET PASSWORD FOR 'root'@'localhost'=PASSWORD(@root_pass) ;
+-- Unfortunately, both 'ALTER USER' [1] and 'SET PASSWORD' [2] require
+-- the password to be a literal string instead of an expression that
+-- evaluates to a string.  Thus neither of the following is valid:
 --
--- Hopefully temporary workaround: use 'ALTER USER' instead; this is
--- not as good (from a security perspective) since the password will
--- now be stored in clear text rather than as a hash.
-ALTER USER 'root'@'localhost' IDENTIFIED BY @root_pass;
+--     ALTER USER 'root'@'localhost' IDENTIFIED BY @root_pass;
+--
+--     SET PASSWORD FOR 'root'@'localhost'=@root_pass;
+--
+-- A workaround is to use a substitution with a shell variable.
+--
+ALTER USER 'root'@'localhost' IDENTIFIED BY '$mysql_root_pass';
+--
+-- Although, the environment variable '$mysql_root_pass' stores the
+-- password in plain text, MySQL 8.0 uses the caching_sha2_password
+-- plugin [3] to encrypt the password before storing it in the
+-- mysql.user table.
+--
 GRANT ALL ON *.* TO 'root'@'localhost' WITH GRANT OPTION;
 DROP DATABASE IF EXISTS test;
 FLUSH PRIVILEGES;
@@ -33,7 +47,7 @@ FLUSH PRIVILEGES;
 -- Setup 2 users (one with read only access and one with update
 -- permissions).
 
-CALL DROP_USER_IF_EXISTS('geo_ip','%'); 
+CALL DROP_USER_IF_EXISTS('geo_ip','%');
 CALL CREATE_USER('geo_ip','%',@geo_ip_pass);
 REVOKE ALL PRIVILEGES, GRANT OPTION FROM 'geo_ip'@'%';
 GRANT SELECT ON TABLE country_locations TO 'geo_ip'@'%';
@@ -52,3 +66,9 @@ GRANT EXECUTE ON geo_ip.* TO 'geo_ip_updater'@'localhost';
 GRANT FILE, ALTER ROUTINE, CREATE ROUTINE ON *.* TO
 'geo_ip_updater'@'localhost';
 FLUSH PRIVILEGES;
+
+-- References
+--
+-- 1. https://dev.mysql.com/doc/refman/8.0/en/alter-user.html
+-- 2. https://dev.mysql.com/doc/refman/8.0/en/set-password.html
+-- 3. https://dev.mysql.com/doc/refman/8.0/en/upgrading-from-previous-series.html#upgrade-caching-sha2-password
