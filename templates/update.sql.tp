@@ -19,10 +19,6 @@
 
 USE geo_ip;
 
--- Load the required SQL libraries
-
-   source $mysql_geo_ip_load_dir/lib-admin.sql;
-
 -- Copy shell variables
 
 SET @archive_date='$geo_ip_archive_date',
