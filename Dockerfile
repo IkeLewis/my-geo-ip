@@ -23,33 +23,16 @@
 # Extend the official MySQL Base Image
 FROM mysql:8.0.19
 
-RUN /bin/bash -x -c '\
-                  # All lines except for the last one (and comments)
-                  # end with '&& \'.
+ARG maxmind_license_key
 
-		  apt-get update && \
-		  apt-get upgrade -y && \
-                  apt-get install -y cron git gettext make policycoreutils procps strace unzip wget && \
-		  cd / && \
+RUN /bin/bash -x -c 'apt-get update && \
+                     apt-get upgrade -y && \
+                     apt-get install -y cron git gettext make policycoreutils procps strace unzip wget'
 
-		  # This dummy line is included so that we may simply
-		  # toggle commenting on lines without having to
-		  # remove '&& \' from the last line.
-
-		  test 1 -eq 1\
-		  '
-
-RUN /bin/bash -x -c '\
-                  # All lines except for the last one (and comments)
-                  # end with '&& \'.
-
-		  git clone https://github.com/IkeLewis/my-geo-ip && \
-		  cd my-geo-ip && \
-		  make && \
-		  make install && \
-
-		  test 1 -eq 1\
-		  '
+RUN /bin/bash -x -c 'git clone https://github.com/IkeLewis/my-geo-ip && \
+		     cd my-geo-ip && \
+		     make && \
+		     make install'
 
 VOLUME /root
 VOLUME /home/geo-ip
