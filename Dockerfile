@@ -18,9 +18,10 @@
 # -p"test"'
 #
 # See https://hub.docker.com/_/mysql/ for more MySQL options.
+#
 
 # Extend the official MySQL Base Image
-FROM mysql:8.0
+FROM mysql:8.0.19
 
 RUN /bin/bash -x -c '\
                   # All lines except for the last one (and comments)

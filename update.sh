@@ -24,7 +24,9 @@ if [ "$(id -un)" == "geo-ip" ]; then
     source /home/geo-ip/update-helper.sh
 elif [ "$(id -un)" == "root" ]; then
     # This is used during install.
-    su --login --command="/home/geo-ip/update-helper.sh" geo-ip
+    su --command="maxmind_license_key="$maxmind_license_key" /home/geo-ip/update-helper.sh" \
+       --login \
+       geo-ip
 else
     geo_ip_error "can't run update.sh as $USER; update.sh must be run as root or geo-ip"
 fi

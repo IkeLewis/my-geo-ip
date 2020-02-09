@@ -5,13 +5,14 @@ my-geo-ip
 
 The my-geo-ip docker repository provides country-level geo-ip services
 to clients via a MySQL database. The data comes from the freely
-available GeoLite2 databases provided by http://maxmind.com. Maxmind
-currently offers the GeoLite2 databases in 2 formats MMDB (a
-proprietary format) and a CSV format. If a distributed storage model
-is desired, Maxmind's database may be more appropriate.  This repo
-uses a centralized storage model. The API is written in SQL and stored
-on the database so that an application only needs to be able to log in
-to MySQL as the geo-ip user to use geo-ip services.
+available GeoLite2 databases provided by
+https://www.maxmind.com. Maxmind currently offers the GeoLite2
+databases in 2 formats MMDB (a proprietary format) and a CSV
+format. If a distributed storage model is desired, Maxmind's database
+may be more appropriate.  This repo uses a centralized storage
+model. The API is written in SQL and stored on the database so that an
+application only needs to be able to log in to MySQL as the geo-ip
+user to use geo-ip services.
 
 Use Cases
 ---------
@@ -19,13 +20,6 @@ Use Cases
 My-geo-ip may be used in stateful firewalls and public servers
 (e.g. mail & web servers) for classifying IP's.  Also, it may be used
 to improve internationalization support for websites.
-
-Philosophy
-----------
-
-My-geo-ip embraces the philosophy of the microservices architecture
-which is essentially equal to the Unix philosophy of "Do one thing and
-do it well".
 
 API
 ---
@@ -43,9 +37,8 @@ Usage Examples below).
 Security Considerations
 -----------------------
 
-To eliminate conflicts and enhance security, my-geo-ip runs in an
-isolated docker container that exposes the port 3306 (MySQL) to its
-host.
+To enhance security, my-geo-ip runs in an isolated docker container
+that exposes the port 3306 (MySQL) to its host.
 
 Considerable thought was given to within-container security; MySQL is
 configured to only accept remote connections for the user 'geo_ip' who
@@ -54,39 +47,18 @@ runs as a non-root system user (geo-ip) inside the docker container.
 All downloads are made with wget with 'https' as the specified
 protocol.
 
-Basic Installation
-------------------
+Installation
+------------
 
-At a terminal type
+1) Obtain a license key from maxmind for the GeoLite2 databases.
 
-```
-$ docker pull ikelewis/my-geo-ip
-
-$ docker run --rm --name my-geo-ip -emysql_geo_ip_pass="test" -d \
-ikelewis/my-geo-ip
-```
-
-The basic installation is intended for small organizations and for
-testing.  If you have a large organization or complex needs, please
-use the advanced installation.
-
-Advanced Installation
----------------------
-
-The following example shows how to deploy my-geo-ip with docker swarm
-and docker secrets.  (The '--advertise-address' option will need to be
-modified for your network.  Also, the number of workers and replicas
-will need to be selected to suit your organization's needs.)
+2) At a terminal type
 
 ```
 $ docker pull ikelewis/my-geo-ip
 
-$ docker swarm init --advertise-addr "192.168.0.193"
-
-$ echo "test" | docker secret create mysql_geo_ip_pass -
-
-$ docker service create --replicas 2 -p3306:3306 \
---secret="mysql_geo_ip_pass" --name="my-geo-ip" ikelewis/my-geo-ip
+$ docker run --rm --name my-geo-ip -emaxmind_license_key=<license-key> \
+-emysql_geo_ip_pass="test" -d ikelewis/my-geo-ip
 ```
 
 API Usage Examples
@@ -99,13 +71,6 @@ For the basic installation
 ```
 $ docker run -it --link my-geo-ip:mysql --rm mysql sh -c 'exec mysql \
 -h"$MYSQL_PORT_3306_TCP_ADDR" -P"3306" -ugeo_ip -p"test"'
-```
-
-For the advanced installation
-
-```
-$ docker run -it --rm mysql /bin/bash -c 'exec mysql \
--h"192.168.0.193" -P"3306" -ugeo_ip -p"test"'
 ```
 
 You should now be at a mysql prompt.
@@ -218,3 +183,8 @@ Removal
 ```
 $ docker rmi ikelewis/my-geo-ip
 ```
+
+References
+----------
+
+[1] https://dev.maxmind.com/geoip/geoip2/geolite2/

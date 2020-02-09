@@ -22,20 +22,20 @@ USE geo_ip;
 -- Copy shell variables
 
 SET @archive_date='$geo_ip_archive_date',
-    @geo_ip_cl='$geo_ip_cl_fn',
-    @geo_ip_cb='$geo_ip_cb_fn';
+    @geo_ip_cl='$geo_ip_tmp_cl_fn',
+    @geo_ip_cb='$geo_ip_tmp_cb_fn';
 
 START TRANSACTION;
 
 -- Insert the new rows
 
-LOAD DATA INFILE '$geo_ip_cl_fn' REPLACE INTO TABLE country_locations
+LOAD DATA INFILE '$geo_ip_tmp_cl_fn' REPLACE INTO TABLE country_locations
 CHARACTER SET utf8 FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY
 '\"' IGNORE 1 LINES (geoname_id, locale_code, continent_code,
 continent_name, country_iso_code, country_name, is_in_european_union) SET
 date=@archive_date;
 
-LOAD DATA INFILE '$geo_ip_cb_fn' REPLACE INTO TABLE
+LOAD DATA INFILE '$geo_ip_tmp_cb_fn' REPLACE INTO TABLE
 country_blocks_ipv4 CHARACTER SET utf8 FIELDS TERMINATED BY ','
 OPTIONALLY ENCLOSED BY '\"' IGNORE 1 LINES (@network, geoname_id,
 registered_country_geoname_id, represented_country_geoname_id,
