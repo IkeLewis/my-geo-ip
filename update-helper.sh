@@ -32,8 +32,10 @@ cd "$geo_ip_home"
 # Download the latest archive
 source download.sh
 
-# Validate the checksum.
-if [ "$(sha256sum "${geo_ip_fn}" | cut -b -32)" != "$(cat "${geo_ip_checksum_fn}")" ] ; then
+# Validate the checksum
+if [[ $(sha256sum -c "${geo_ip_checksum_fn}") -ne 0 ]]; then
+    # Another way of checking the hash:
+    # if [ "$(sha256sum "${geo_ip_fn}" | cut -b -64)" != "$(cat "${geo_ip_checksum_fn}")" ] ; then
     rm "${geo_ip_fn}"
     geo_ip_error "Invalid checksum for ${geo_ip_fn}"
 fi
