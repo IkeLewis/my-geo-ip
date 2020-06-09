@@ -33,12 +33,12 @@ cd "$geo_ip_home"
 source download.sh
 
 # Validate the checksum.
-if [ "$(md5sum "${geo_ip_fn}" | cut -b -32)" != "$(cat "${geo_ip_checksum_fn}")" ] ; then
+if [ "$(sha256sum "${geo_ip_fn}" | cut -b -32)" != "$(cat "${geo_ip_checksum_fn}")" ] ; then
     rm "${geo_ip_fn}"
-    geo_ip_error "Invalid checksum for GeoLite2-Country-CSV_$tues.zip"
+    geo_ip_error "Invalid checksum for ${geo_ip_fn}"
 fi
 
-# Remove an old archive and checksum files.
+# Remove any old archive and checksum files.
 rm -f $(ls ${geo_ip_home}/downloads/GeoLite2-Country-CSV_* | \
 	grep --invert-match "${geo_ip_archive_date}")
 
