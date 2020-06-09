@@ -85,8 +85,7 @@ if [ $i -eq $max_tries ]; then
     geo_ip_error "Download(s) failed."
 fi
 
-# Wait at least 0.5 hrs but not more than 1 hr before the
-# next try.
+# Wait at least 30 min but not more than 1 hr before the next try.
 wt=$(( 30 + $RANDOM % 31 ))
 echo "Retrying in $wt minutes."
 sleep ${wt}m
