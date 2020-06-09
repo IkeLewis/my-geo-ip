@@ -48,7 +48,7 @@ if [ -z "$maxmind_license_key" ]; then
 fi
 
 # URL for the archive file
-wget_url_fn="https://download.maxmind.com/app/geoip_download?date=${geo_ip_archive_date}&edition_id=GeoLite2-Country-CSV&license_key=${maxmind_license_key}&suffix=zip"
+wget_url_fn="https://download.maxmind.com/app/geoip_download?edition_id=GeoLite2-Country-CSV&license_key=${maxmind_license_key}&suffix=zip"
 
 # Desired absolute path to the archive file
 geo_ip_fn="${geo_ip_home}/downloads/GeoLite2-Country-CSV_${geo_ip_archive_date}.zip"
@@ -64,10 +64,10 @@ if [ ! -e "${geo_ip_fn}" ] ; then
 fi
 
 # URL for the checksum file
-wget_url_checksum_fn="${wget_url_fn}.md5"
+wget_url_checksum_fn="${wget_url_fn}.sha256"
 
 # Desired absolue path to the corresponding checksum file
-geo_ip_checksum_fn="${geo_ip_fn}.md5"
+geo_ip_checksum_fn="${geo_ip_fn}.sha256"
 
 # If the checksum file does not exist, download it.
 if [ ! -e "${geo_ip_checksum_fn}" ] ; then
