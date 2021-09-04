@@ -1,5 +1,3 @@
-[![Build Status](https://travis-ci.org/IkeLewis/my-geo-ip.svg?branch=master)](https://travis-ci.org/IkeLewis/my-geo-ip)
-
 my-geo-ip
 ==========
 
